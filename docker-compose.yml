@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: tercio
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: Notes
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./notes-app-server
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_URL=postgresql://tercio:password@postgres:5432/Notes?schema=public
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./notes-app-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
